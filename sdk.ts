@@ -51,143 +51,179 @@ interface WhaleTransfer {
 }
 
 export async function getAIRecommendation(walletAddress: string): Promise<AIInsightData> {
-  await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate network delay
   return {
     walletAddress,
     summary:
-      "This wallet shows consistent activity in DeFi protocols, primarily engaging in liquidity provision and yield farming. There's a notable increase in stablecoin transactions, suggesting a cautious approach in volatile markets. The wallet has also recently interacted with a new NFT marketplace.",
+      "Wallet ini menunjukkan pola perdagangan yang aktif dengan fokus pada aset berkapitalisasi besar. Ada indikasi aktivitas arbitrase sesekali dan partisipasi dalam protokol DeFi.",
     riskScore: 0.45,
-    riskExplanation: "Medium risk due to exposure to new protocols and potential impermanent loss in liquidity pools.",
-    recommendations: [
-      "Monitor new DeFi protocols",
-      "Diversify stablecoin holdings",
-      "Consider taking profits from high-performing NFTs",
-    ],
+    riskExplanation:
+      "Risiko sedang karena diversifikasi yang wajar dan aktivitas yang dapat diprediksi, namun ada paparan terhadap volatilitas pasar.",
+    recommendations: ["Hold", "Hedge"],
     confidence: 0.85,
     timestamp: new Date().toISOString(),
   }
 }
 
 export async function getBehaviorInsights(walletAddress: string): Promise<BehaviorData> {
-  await new Promise((resolve) => setTimeout(resolve, 700)) // Simulate API delay
-
-  const generateMockHeatmapData = () => {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    return days.map((day) => ({
-      day,
-      hours: Array.from({ length: 24 }, (_, hour) => ({
-        hour,
-        transactions: Math.floor(Math.random() * 50),
-        volume: Math.floor(Math.random() * 10000),
-      })),
-    }))
-  }
-
-  const generateMockWhaleTransfers = () => {
-    const tokens = ["ETH", "USDC", "SEI", "ATOM", "SOL"]
-    const directions = ["in", "out"]
-    const counterparties = ["0xabc...123", "0xdef...456", "0xghi...789"]
-    const transfers: WhaleTransfer[] = []
-    for (let i = 0; i < 10; i++) {
-      const amount = Math.floor(Math.random() * 500000) + 50000 // $50k to $550k
-      const token = tokens[Math.floor(Math.random() * tokens.length)]
-      const direction = directions[Math.floor(Math.random() * directions.length)]
-      const timestamp = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
-      const counterparty = counterparties[Math.floor(Math.random() * counterparties.length)]
-      transfers.push({
-        id: `transfer-${i}`,
-        amount,
-        token,
-        direction,
-        timestamp,
-        counterparty,
-        usdValue: amount * (Math.random() * 0.5 + 0.5), // Simulate some USD value
-      })
-    }
-    return transfers
-  }
+  await new Promise((resolve) => setTimeout(resolve, 700)) // Simulate network delay
 
   return {
     walletAddress,
     behaviorPatterns: [
+      { pattern: "Active Trader", confidence: 90, description: "Sering melakukan transaksi jual beli." },
       {
-        pattern: "DeFi Degen",
-        confidence: 80,
-        description: "Frequent interactions with various DeFi protocols, high risk tolerance.",
+        pattern: "DeFi Participant",
+        confidence: 75,
+        description: "Berinteraksi dengan berbagai protokol keuangan terdesentralisasi.",
       },
       {
-        pattern: "NFT Collector",
-        confidence: 65,
-        description: "Significant holdings and trading activity in non-fungible tokens.",
-      },
-      {
-        pattern: "Long-Term HODLer",
-        confidence: 50,
-        description: "Holds a substantial portion of assets for extended periods.",
+        pattern: "Long-term Holder",
+        confidence: 60,
+        description: "Memegang beberapa aset untuk jangka waktu yang lebih lama.",
       },
     ],
     tokenDistribution: [
-      { name: "ETH", value: 40, color: "#8B5CF6" },
+      { name: "ETH", value: 45, color: "#8B5CF6" },
       { name: "USDC", value: 25, color: "#10B981" },
       { name: "SEI", value: 15, color: "#F59E0B" },
       { name: "ATOM", value: 10, color: "#EF4444" },
-      { name: "Other", value: 10, color: "#3B82F6" },
+      { name: "Other", value: 5, color: "#3B82F6" },
     ],
-    dailyActivityHeatmap: generateMockHeatmapData(),
-    whaleMovements: generateMockWhaleTransfers(),
+    dailyActivityHeatmap: [
+      {
+        day: "Mon",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+      {
+        day: "Tue",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+      {
+        day: "Wed",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+      {
+        day: "Thu",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+      {
+        day: "Fri",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+      {
+        day: "Sat",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+      {
+        day: "Sun",
+        hours: Array.from({ length: 24 }, (_, hour) => ({
+          hour,
+          transactions: Math.floor(Math.random() * 50),
+          volume: Math.floor(Math.random() * 10000),
+        })),
+      },
+    ],
+    whaleMovements: [
+      {
+        id: "wt-1",
+        amount: 150000,
+        token: "ETH",
+        direction: "in",
+        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        counterparty: "0xabc...123",
+        usdValue: 250000,
+      },
+      {
+        id: "wt-2",
+        amount: 200000,
+        token: "USDC",
+        direction: "out",
+        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        counterparty: "0xdef...456",
+        usdValue: 200000,
+      },
+      {
+        id: "wt-3",
+        amount: 75000,
+        token: "SEI",
+        direction: "in",
+        timestamp: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000).toISOString(),
+        counterparty: "0xghi...789",
+        usdValue: 100000,
+      },
+      {
+        id: "wt-4",
+        amount: 300000,
+        token: "ETH",
+        direction: "out",
+        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        counterparty: "0xjkl...012",
+        usdValue: 500000,
+      },
+      {
+        id: "wt-5",
+        amount: 100000,
+        token: "ATOM",
+        direction: "in",
+        timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+        counterparty: "0xmnp...345",
+        usdValue: 120000,
+      },
+    ],
   }
 }
 
 export async function getAnomalyAlerts(): Promise<AnomalyAlert[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300)) // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 300)) // Simulate network delay
   return [
     {
       id: "alert-1",
       type: "critical",
-      title: "Large Outflow to Unknown Wallet",
-      description: "A significant amount of SEI tokens transferred from a monitored wallet to an unverified address.",
-      time: "2 minutes ago",
-      category: "whale-movement",
-      walletAddress: "sei1xyz...abc",
-      amount: 150000,
-      token: "SEI",
+      title: "Large Outflow Detected",
+      description: "Penarikan 500 ETH yang tidak biasa ke alamat yang tidak dikenal.",
+      time: "2024-07-24T10:30:00Z",
+      category: "Security",
     },
     {
       id: "alert-2",
       type: "warning",
-      title: "Unusual Volume Spike on DEX",
-      description: "Detected an abnormal increase in trading volume for a low-cap token on a decentralized exchange.",
-      time: "15 minutes ago",
-      category: "volume-spike",
-      metadata: { token: "XYZ", dex: "SeiSwap" },
+      title: "High Gas Fees",
+      description: "Biaya gas yang lebih tinggi dari rata-rata terdeteksi pada transaksi terbaru.",
+      time: "2024-07-24T09:15:00Z",
+      category: "Cost",
     },
     {
       id: "alert-3",
       type: "info",
-      title: "New Contract Interaction",
-      description: "Wallet interacted with a newly deployed smart contract. Review for legitimacy.",
-      time: "1 hour ago",
-      category: "risky-contract",
-      walletAddress: "sei1def...ghi",
-      metadata: { contractAddress: "0x123...xyz" },
-    },
-    {
-      id: "alert-4",
-      type: "critical",
-      title: "Potential Flash Loan Attack",
-      description: "Detected a series of rapid transactions indicative of a flash loan exploit attempt.",
-      time: "3 hours ago",
-      category: "flash_loan",
-    },
-    {
-      id: "alert-5",
-      type: "warning",
-      title: "Liquidity Pool Imbalance",
-      description: "Significant imbalance detected in a liquidity pool where the wallet has active positions.",
-      time: "Yesterday",
-      category: "liquidity",
-      walletAddress: "sei1jkl...mno",
-      metadata: { pool: "SEI/USDC" },
+      title: "New Token Interaction",
+      description: "Dompet berinteraksi dengan kontrak token baru: XYZ.",
+      time: "2024-07-23T18:00:00Z",
+      category: "Activity",
     },
   ]
 }

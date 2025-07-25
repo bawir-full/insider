@@ -58,28 +58,17 @@ export function AIChatSidebar({ isOpen, onClose, walletContext }: AIChatSidebarP
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: inputMessage,
-          context: { walletAddress: walletContext },
-        }),
-      })
+      // Simulate AI response
+      await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate API call delay
+      const dummyResponse = `Saya telah menerima pertanyaan Anda tentang "${inputMessage}". Untuk dompet ${walletContext ? walletContext.substring(0, 10) + "..." : "yang terhubung"}, saya dapat memberikan wawasan tentang pola pengeluaran, distribusi token, dan transfer paus.`
 
-      const data = await response.json()
-
-      if (data.success) {
-        const assistantMessage: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: data.response,
-          timestamp: data.timestamp,
-        }
-        setMessages((prev) => [...prev, assistantMessage])
-      } else {
-        throw new Error(data.error || "Failed to get AI response")
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: dummyResponse,
+        timestamp: new Date().toISOString(),
       }
+      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
       console.error("Chat error:", error)
       const errorMessage: ChatMessage = {

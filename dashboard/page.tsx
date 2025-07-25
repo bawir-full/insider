@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -22,7 +21,6 @@ import {
   Search,
   Settings,
   CalendarDays,
-  LogOut,
   AlertTriangle,
   Bot,
   CheckCircle,
@@ -79,12 +77,13 @@ interface AnomalyAlert {
 }
 
 export default function Dashboard() {
-  const [selectedWallet, setSelectedWallet] = useState("") // Start empty
+  // Hardcode a dummy wallet address
+  const DUMMY_WALLET_ADDRESS = "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"
+  const [selectedWallet, setSelectedWallet] = useState(DUMMY_WALLET_ADDRESS)
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [realTimeData, setRealTimeData] = useState([])
   const [isUnlockModalOpen, setIsUnlockModal] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [connectedWallet, setConnectedWallet] = useState("")
   const [backendStatus, setBackendStatus] = useState<any>(null)
   const [apiEndpointStatus, setApiEndpointStatus] = useState<any>(null)
   const [showToast, setShowToast] = useState(false)
@@ -95,18 +94,22 @@ export default function Dashboard() {
   const [behaviorData, setBehaviorData] = useState<BehaviorData | null>(null)
   const [anomalyAlerts, setAnomalyAlerts] = useState<AnomalyAlert[]>([])
 
-  // Load wallet from localStorage on component mount
+  // No need for localStorage or initial redirect anymore
   useEffect(() => {
-    const savedWallet = localStorage.getItem("connectedWallet")
-    if (savedWallet) {
-      setSelectedWallet(savedWallet)
-      setConnectedWallet(savedWallet)
-      showSuccessToast(`Restored session for ${savedWallet.substring(0, 10)}...`)
-    } else {
-      // Redirect to landing page if no wallet connected
-      window.location.href = "/"
+    // Initial fetch for AI Insights and Behavior Data
+    const fetchInitialInsights = async () => {
+      try {
+        const aiData = await getAIRecommendation(DUMMY_WALLET_ADDRESS)
+        setAiInsight(aiData)
+
+        const behavior = await getBehaviorInsights(DUMMY_WALLET_ADDRESS)
+        setBehaviorData(behavior)
+      } catch (error) {
+        console.error("Failed to fetch initial insights:", error)
+      }
     }
-  }, [])
+    fetchInitialInsights()
+  }, []) // Run once on mount
 
   const showSuccessToast = (message: string) => {
     setToastMessage(message)
@@ -117,7 +120,8 @@ export default function Dashboard() {
   // Fetch real-time wallet data (now dummy)
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined
-    if (isMonitoring && selectedWallet) {
+    if (isMonitoring) {
+      // No longer dependent on selectedWallet state
       interval = setInterval(() => {
         const newPoint = {
           time: new Date().toLocaleTimeString(),
@@ -133,7 +137,7 @@ export default function Dashboard() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [isMonitoring, selectedWallet])
+  }, [isMonitoring])
 
   // Fetch backend status and API endpoint status (now dummy)
   useEffect(() => {
@@ -161,24 +165,6 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  // Fetch AI Insights and Behavior Data when selectedWallet changes (using SDK dummy data)
-  useEffect(() => {
-    const fetchInsights = async () => {
-      if (selectedWallet) {
-        try {
-          const aiData = await getAIRecommendation(selectedWallet)
-          setAiInsight(aiData)
-
-          const behavior = await getBehaviorInsights(selectedWallet)
-          setBehaviorData(behavior)
-        } catch (error) {
-          console.error("Failed to fetch insights:", error)
-        }
-      }
-    }
-    fetchInsights()
-  }, [selectedWallet])
-
   // Fetch Anomaly Alerts (using SDK dummy data)
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -194,19 +180,7 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleWalletChange = (newWallet: string) => {
-    setSelectedWallet(newWallet)
-    setConnectedWallet(newWallet)
-    localStorage.setItem("connectedWallet", newWallet)
-    showSuccessToast(`Connected to ${newWallet.substring(0, 10)}...`)
-  }
-
-  const handleDisconnect = () => {
-    localStorage.removeItem("connectedWallet")
-    setSelectedWallet("")
-    setConnectedWallet("")
-    window.location.href = "/"
-  }
+  // Removed handleWalletChange and handleDisconnect as wallet connection is removed
 
   // Helper to get alert icon based on severity
   const getAlertIcon = (type: string) => {
@@ -222,18 +196,7 @@ export default function Dashboard() {
     }
   }
 
-  // If no wallet connected, show loading or redirect
-  if (!connectedWallet) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Wallet className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-500">No wallet connected. Redirecting...</p>
-        </div>
-      </div>
-    )
-  }
-
+  // No longer need to check for connectedWallet to render
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Success Toast */}
@@ -256,7 +219,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">INSIDER</h1>
-                <p className="text-slate-500">Connected: {connectedWallet.substring(0, 10)}...</p>
+                <p className="text-slate-500">Connected: {selectedWallet.substring(0, 10)}...</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -281,15 +244,7 @@ export default function Dashboard() {
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDisconnect}
-                className="border-red-300 text-red-700 hover:bg-red-50 bg-transparent"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Disconnect
-              </Button>
+              {/* Removed Disconnect button */}
             </div>
           </div>
         </div>
@@ -392,18 +347,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="mb-4 flex items-center space-x-4">
-                    <Input
-                      placeholder="Enter wallet address (0x...)"
-                      value={selectedWallet}
-                      onChange={(e) => setSelectedWallet(e.target.value)}
-                      className="bg-slate-50 border-slate-300 text-slate-900"
-                    />
-                    <Button
-                      onClick={() => handleWalletChange(selectedWallet)}
-                      className="bg-purple-600 hover:bg-purple-700"
-                    >
-                      Update Wallet
-                    </Button>
+                    {/* Removed wallet input */}
                     <Button
                       onClick={() => setIsMonitoring(!isMonitoring)}
                       className={isMonitoring ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
