@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Brain, TrendingUp, TrendingDown, Shield, Target, Lightbulb, RefreshCw } from "lucide-react"
+import { getAIRecommendation } from "@/sdk" // Import from SDK
 
 interface AIInsight {
   walletAddress: string
@@ -37,19 +38,20 @@ export function AIRecommendationPanel({ walletAddress }: AIRecommendationPanelPr
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch("/api/ai/insight", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress }),
+      // Use the SDK function which now returns dummy data
+      const data = await getAIRecommendation(walletAddress)
+
+      // Map SDK data to local AIInsight interface
+      setAiInsight({
+        walletAddress: data.walletAddress,
+        summary: data.summary,
+        riskScore: data.riskScore,
+        // For simplicity, pick one recommendation or default
+        recommendation: (data.recommendations[0] || "Hold") as "Hold" | "Sell" | "Hedge" | "Buy More",
+        reasoning: data.riskExplanation, // Using riskExplanation as reasoning for now
+        confidence: data.confidence,
+        timestamp: data.timestamp,
       })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setAiInsight(data.data)
-      } else {
-        throw new Error(data.error || "Failed to get AI insight")
-      }
     } catch (error) {
       console.error("Failed to fetch AI insight:", error)
       setError(error instanceof Error ? error.message : "Failed to fetch AI insight")

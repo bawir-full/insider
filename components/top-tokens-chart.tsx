@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts"
 import { TrendingUp, TrendingDown, Minus, Coins } from "lucide-react"
+import { getBehaviorInsights } from "@/sdk" // Import from SDK
 
 interface TokenData {
   token: string
@@ -31,13 +32,15 @@ export function TopTokensChart({ walletAddress }: TopTokensChartProps) {
   const fetchTokenData = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/insights/${walletAddress}`)
-      const data = await response.json()
+      // Use the SDK function which now returns dummy data
+      const behaviorData = await getBehaviorInsights(walletAddress)
 
-      // Transform the data to include additional metrics
+      // Transform the data to include additional metrics and map to TokenData
       const enrichedTokens =
-        data.topTokens?.map((token: any) => ({
-          ...token,
+        behaviorData.tokenDistribution?.map((token: any) => ({
+          token: token.name,
+          percentage: token.value,
+          trend: Math.random() > 0.7 ? "up" : Math.random() > 0.4 ? "down" : "stable", // Simulated trend
           value: Math.floor(Math.random() * 100000) + 10000, // Simulated USD value
           change24h: (Math.random() - 0.5) * 20, // -10% to +10% change
         })) || []
@@ -45,9 +48,20 @@ export function TopTokensChart({ walletAddress }: TopTokensChartProps) {
       setTokenData(enrichedTokens)
     } catch (error) {
       console.error("Failed to fetch token data:", error)
+      setTokenData(generateMockTokenData()) // Fallback to local mock if SDK fails
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const generateMockTokenData = (): TokenData[] => {
+    return [
+      { token: "ETH", percentage: 40, trend: "up", value: 50000, change24h: 5.2 },
+      { token: "USDC", percentage: 25, trend: "stable", value: 30000, change24h: 0.1 },
+      { token: "SEI", percentage: 15, trend: "down", value: 15000, change24h: -3.5 },
+      { token: "ATOM", percentage: 10, trend: "up", value: 10000, change24h: 2.8 },
+      { token: "SOL", percentage: 10, trend: "down", value: 8000, change24h: -1.9 },
+    ]
   }
 
   const getTrendIcon = (trend: string) => {
@@ -98,7 +112,10 @@ export function TopTokensChart({ walletAddress }: TopTokensChartProps) {
   }))
 
   const totalValue = tokenData.reduce((sum, token) => sum + (token.value || 0), 0)
-  const topToken = tokenData[0]
+  const topToken =
+    tokenData.length > 0
+      ? tokenData.reduce((prev, current) => (prev.percentage > current.percentage ? prev : current))
+      : null
   const diversificationScore = tokenData.length > 0 ? (1 - (topToken?.percentage || 0) / 100) * 100 : 0
 
   return (

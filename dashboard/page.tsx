@@ -82,7 +82,7 @@ export default function Dashboard() {
   const [selectedWallet, setSelectedWallet] = useState("") // Start empty
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [realTimeData, setRealTimeData] = useState([])
-  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false)
+  const [isUnlockModalOpen, setIsUnlockModal] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [connectedWallet, setConnectedWallet] = useState("")
   const [backendStatus, setBackendStatus] = useState<any>(null)
@@ -114,21 +114,20 @@ export default function Dashboard() {
     setTimeout(() => setShowToast(false), 3000)
   }
 
-  // Fetch real-time wallet data
+  // Fetch real-time wallet data (now dummy)
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined
     if (isMonitoring && selectedWallet) {
-      interval = setInterval(async () => {
-        try {
-          const response = await fetch("/api/realtime-wallet-data")
-          const newPoint = await response.json()
-          setRealTimeData((prev) => {
-            const newData = [...prev, newPoint]
-            return newData.slice(-6) // Keep only last 6 points
-          })
-        } catch (error) {
-          console.error("Failed to fetch real-time wallet data:", error)
+      interval = setInterval(() => {
+        const newPoint = {
+          time: new Date().toLocaleTimeString(),
+          volume: Math.floor(Math.random() * 10000) + 1000,
+          transactions: Math.floor(Math.random() * 50) + 5,
         }
+        setRealTimeData((prev) => {
+          const newData = [...prev, newPoint]
+          return newData.slice(-6) // Keep only last 6 points
+        })
       }, 3000)
     }
     return () => {
@@ -136,17 +135,25 @@ export default function Dashboard() {
     }
   }, [isMonitoring, selectedWallet])
 
-  // Fetch backend status and API endpoint status
+  // Fetch backend status and API endpoint status (now dummy)
   useEffect(() => {
     const fetchBackendStatus = async () => {
-      try {
-        const response = await fetch("/api/status")
-        const data = await response.json()
-        setBackendStatus(data)
-        setApiEndpointStatus(data.apiEndpoints)
-      } catch (error) {
-        console.error("Failed to fetch backend status:", error)
-      }
+      await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate delay
+      setBackendStatus({
+        seiRpcEndpoint: { status: "Connected", latency: `${Math.floor(Math.random() * 50) + 20}ms` },
+        webSocketStream: { status: "Active", latency: `${Math.floor(Math.random() * 10) + 5}ms` },
+        cronJobs: { status: "Running" },
+        alertEngine: { status: "Ready", deliveryTime: `${Math.floor(Math.random() * 500) + 100}ms` },
+        cryptoRankApi: { status: "Active" },
+        messariApi: { status: "Active" },
+        mongoDb: { status: "Connected", queryTime: `${Math.floor(Math.random() * 100) + 10}ms` },
+      })
+      setApiEndpointStatus({
+        "/api/ai/insight": { status: "200 OK", responseTime: `${Math.floor(Math.random() * 100) + 50}ms` },
+        "/api/alerts/anomalies": { status: "200 OK", responseTime: `${Math.floor(Math.random() * 80) + 40}ms` },
+        "/api/insights/[wallet]": { status: "200 OK", responseTime: `${Math.floor(Math.random() * 120) + 60}ms` },
+        "/api/realtime-wallet-data": { status: "200 OK", responseTime: `${Math.floor(Math.random() * 30) + 10}ms` },
+      })
     }
 
     fetchBackendStatus()
@@ -154,7 +161,7 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  // Fetch AI Insights and Behavior Data when selectedWallet changes
+  // Fetch AI Insights and Behavior Data when selectedWallet changes (using SDK dummy data)
   useEffect(() => {
     const fetchInsights = async () => {
       if (selectedWallet) {
@@ -172,7 +179,7 @@ export default function Dashboard() {
     fetchInsights()
   }, [selectedWallet])
 
-  // Fetch Anomaly Alerts
+  // Fetch Anomaly Alerts (using SDK dummy data)
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
@@ -328,7 +335,7 @@ export default function Dashboard() {
 
           <Card
             className="bg-white border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => setIsUnlockModalOpen(true)}
+            onClick={() => setIsUnlockModal(true)}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-900">Token Unlocks</CardTitle>
@@ -647,7 +654,7 @@ export default function Dashboard() {
                           }}
                           itemStyle={{ color: "#1E293B" }}
                         />
-                        <Area type="monotone" dataKey="value" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.3} />
+                        <Area type="monotone" dataKey="volume" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.3} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -881,7 +888,7 @@ export default function Dashboard() {
       </div>
 
       {/* Unlock Calendar Modal */}
-      <UnlockCalendarModal isOpen={isUnlockModalOpen} onClose={() => setIsUnlockModalOpen(false)} />
+      <UnlockCalendarModal isOpen={isUnlockModalOpen} onClose={() => setIsUnlockModal(false)} />
 
       {/* AI Chat Sidebar */}
       <AIChatSidebar isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} walletContext={selectedWallet} />

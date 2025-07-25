@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { TrendingUp, ArrowUpRight, ArrowDownLeft, Filter, Waves } from "lucide-react"
+import { getBehaviorInsights } from "@/sdk" // Import from SDK
 
 interface WhaleTransfer {
   id: string
@@ -26,7 +27,7 @@ export function WhaleTransferPlot({ walletAddress }: WhaleTransferPlotProps) {
   const [filteredTransfers, setFilteredTransfers] = useState<WhaleTransfer[]>([])
   const [selectedToken, setSelectedToken] = useState<string>("all")
   const [selectedDirection, setSelectedDirection] = useState<string>("all")
-  const [timeRange, setTimeRange] = useState<string>("7d")
+  const [timeRange, setTimeRange] = useState<string>("7d") // Keep timeRange for UI, but data is static
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -40,22 +41,39 @@ export function WhaleTransferPlot({ walletAddress }: WhaleTransferPlotProps) {
   const fetchWhaleTransfers = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/insights/${walletAddress}`)
-      const data = await response.json()
-
-      // Enrich whale transfers with additional data
-      const enrichedTransfers =
-        data.whaleTransfers?.map((transfer: any) => ({
-          ...transfer,
-          usdValue: transfer.amount * 0.7, // Simulated USD conversion
-        })) || []
-
-      setTransfers(enrichedTransfers)
+      // Use the SDK function which now returns dummy data
+      const behaviorData = await getBehaviorInsights(walletAddress)
+      setTransfers(behaviorData.whaleMovements || [])
     } catch (error) {
       console.error("Failed to fetch whale transfers:", error)
+      setTransfers(generateMockWhaleTransfers()) // Fallback to local mock if SDK fails
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const generateMockWhaleTransfers = (): WhaleTransfer[] => {
+    const tokens = ["ETH", "USDC", "SEI", "ATOM", "SOL"]
+    const directions = ["in", "out"]
+    const counterparties = ["0xabc...123", "0xdef...456", "0xghi...789"]
+    const mockTransfers: WhaleTransfer[] = []
+    for (let i = 0; i < 10; i++) {
+      const amount = Math.floor(Math.random() * 500000) + 50000 // $50k to $550k
+      const token = tokens[Math.floor(Math.random() * tokens.length)]
+      const direction = directions[Math.floor(Math.random() * directions.length)]
+      const timestamp = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+      const counterparty = counterparties[Math.floor(Math.random() * counterparties.length)]
+      mockTransfers.push({
+        id: `mock-transfer-${i}`,
+        amount,
+        token,
+        direction,
+        timestamp,
+        counterparty,
+        usdValue: amount * (Math.random() * 0.5 + 0.5), // Simulate some USD value
+      })
+    }
+    return mockTransfers
   }
 
   const applyFilters = () => {

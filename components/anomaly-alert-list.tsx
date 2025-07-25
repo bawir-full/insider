@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertTriangle, Shield, Zap, TrendingUp, Waves, RefreshCw, Filter, Bell, Eye, X } from "lucide-react"
+import { getAnomalyAlerts } from "@/sdk" // Import from SDK
 
 interface AnomalyAlert {
   id: string
@@ -42,14 +43,50 @@ export function AnomalyAlertList() {
   const fetchAlerts = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/alerts/anomalies")
-      const data = await response.json()
+      // Use the SDK function which now returns dummy data
+      const data = await getAnomalyAlerts()
       setAlerts(data)
     } catch (error) {
       console.error("Failed to fetch anomaly alerts:", error)
+      setAlerts(generateMockAlerts()) // Fallback to local mock if SDK fails
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const generateMockAlerts = (): AnomalyAlert[] => {
+    return [
+      {
+        id: "mock-alert-1",
+        type: "critical",
+        title: "Large Outflow to Unknown Wallet",
+        description: "A significant amount of SEI tokens transferred from a monitored wallet to an unverified address.",
+        time: "2 minutes ago",
+        category: "whale-movement",
+        walletAddress: "sei1mock...abc",
+        amount: 150000,
+        token: "SEI",
+      },
+      {
+        id: "mock-alert-2",
+        type: "warning",
+        title: "Unusual Volume Spike on DEX",
+        description: "Detected an abnormal increase in trading volume for a low-cap token on a decentralized exchange.",
+        time: "15 minutes ago",
+        category: "volume-spike",
+        metadata: { token: "XYZ", dex: "SeiSwap" },
+      },
+      {
+        id: "mock-alert-3",
+        type: "info",
+        title: "New Contract Interaction",
+        description: "Wallet interacted with a newly deployed smart contract. Review for legitimacy.",
+        time: "1 hour ago",
+        category: "risky-contract",
+        walletAddress: "sei1mock...ghi",
+        metadata: { contractAddress: "0x123...xyz" },
+      },
+    ]
   }
 
   const applyFilters = () => {
