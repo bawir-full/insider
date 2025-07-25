@@ -1,0 +1,22 @@
+{
+  "functions": {
+    "backend/workers/ws-anomaly-listener.ts": {
+      "runtime": "nodejs18.x"
+    },
+    "backend/workers/ws-unlock-listener.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/unlock-fetch",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api-docs",
+      "destination": "/api/docs"
+    }
+  ]
+}
